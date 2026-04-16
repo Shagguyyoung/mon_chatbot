@@ -7,8 +7,9 @@ export default defineConfig({
   server: {
     proxy: {
       '/moodle': {
-        target: import.meta.env.VITE_MOODLE_URL || 'http://localhost',
+        target: process.env.VITE_MOODLE_URL || 'http://localhost',
         changeOrigin: true,
+        secure: false,
         rewrite: (path) => path.replace(/^\/moodle/, '')
       }
     }
