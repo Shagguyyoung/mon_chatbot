@@ -3,10 +3,10 @@ import { useState } from 'react';
 import { useChat } from '../hooks/usechat'
 import ChatWindow from './ChatWindow';
 
-export default function ChatBubble() {
+export default function ChatBubble({ userId, courseId }) {
 
   const [isOpen, setIsOpen] = useState(false);
-  const {messages, isTyping, sendMessage } = useChat();
+  const {messages, isTyping, sendMessage } = useChat(userId, courseId);
    return (
     <div className='fixed bottom-6 right-6 z-50 '>
         {isOpen && (

@@ -10,7 +10,7 @@ function App() {
 
   return (
     <>
-      <ChatBubble/> 
+      <ChatBubble userId="123" courseId="456"/> 
       
     </>
   )
