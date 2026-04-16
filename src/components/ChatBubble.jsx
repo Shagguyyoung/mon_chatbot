@@ -1,6 +1,6 @@
 import React from 'react'
 import { useState } from 'react';
-import { useChat } from '../hooks/usechat'
+import { useChat } from '../hooks/useChat'
 import ChatWindow from './ChatWindow';
 
 export default function ChatBubble({ userId, courseId }) {
