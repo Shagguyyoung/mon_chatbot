@@ -1,27 +1,32 @@
-const TOKEN = import.meta.env.VITE_MOODLE_TOKEN
+export default async function handler(req, res) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' })
+  }
 
-async function callMoodle(wsfunction, params = {}) {
-  const url = new URL(`http://localhost:5173/moodle/webservice/rest/server.php`)
-  url.searchParams.set("wstoken", TOKEN)
-  url.searchParams.set("wsfunction", wsfunction)
-  url.searchParams.set("moodlewsrestformat", "json")
-  Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v))
+  const { messages } = req.body
 
-  const res = await fetch(url)
-  return res.json()
-}
+  try {
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.VITE_GROQ_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        messages: [
+          {
+            role: 'system',
+            content: 'Tu es un assistant pédagogique. Réponds toujours en français.'
+          },
+          ...messages
+        ]
+      })
+    })
 
-export async function getCourses(userId) {
-  return callMoodle("core_enrol_get_users_courses", { userid: userId })
-}
-
-export async function getAssignments(courseId) {
-  return callMoodle("mod_assign_get_assignments", { "courseids[0]": courseId })
-}
-
-export async function getGrades(courseId, userId) {
-  return callMoodle("gradereport_user_get_grade_items", {
-    courseid: courseId,
-    userid: userId
-  })
+    const data = await response.json()
+    res.status(200).json({ reply: data.choices[0].message.content })
+  } catch (error) {
+    res.status(500).json({ error: 'Erreur serveur' })
+  }
 }
