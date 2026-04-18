@@ -1,6 +1,7 @@
 import { useState } from "react"
+import { isMoodleAvailable, getMoodleContext } from "../api/moodleApi"
 
-export function useChat() {
+export function useChat(userId = null, courseId = null) {
   const [messages, setMessages] = useState([
     { id: 1, text: "Bonjour ! Comment puis-je vous aider ?", from: "bot" }
   ])
@@ -21,11 +22,25 @@ export function useChat() {
         content: m.text
       }))
 
+    // Récupérer le contexte Moodle seulement s'il est disponible
+    let moodleContext = ""
+    if (isMoodleAvailable() && userId && courseId) {
+      const data = await getMoodleContext(userId, courseId)
+      if (data) {
+        moodleContext = `
+          Contexte Moodle de l'étudiant :
+          - Cours : ${JSON.stringify(data.courses)}
+          - Devoirs : ${JSON.stringify(data.assignments)}
+          - Notes : ${JSON.stringify(data.grades)}
+        `
+      }
+    }
+
     try {
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: history })
+        body: JSON.stringify({ messages: history, moodleContext })
       })
 
       const data = await response.json()
